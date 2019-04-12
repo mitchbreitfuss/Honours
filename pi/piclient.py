@@ -19,7 +19,7 @@ refreshRate = 4
 
 
 # This block pauses the program execution until the arduino is ready.
-startup = 0
+startup = 1
 while startup == 0:
     x = ser.readline()
     decodedMessage = x.decode('utf-8')
@@ -38,14 +38,22 @@ class Application(Frame):
     # Messages are for general communications between the two devices, for debugging purposes.
     # Commands are for changing parameters on either device to change how it operates.
     def readSerial(self):
-
         x = ser.readline()  # Reads in a line from the serial port.
+
         # This if statement will only run if the read line x has non-zero length.
         if(len(x) != 0):
             # Converts from byte data to a utf-8 formatted string.
-            decodedMessage = x.decode('utf-8')
+            while True:
+                try:
+                    decodedMessage = x.decode('utf-8')
+                    break
+                except UnicodeDecodeError:
+                    decodedMessage = ''
+                    print("[Error] Decode Error from serial")
+                    break
             if("\n" in decodedMessage):
                 decodedMessage = decodedMessage.replace("\n", "")
+                
 
             dataType = 0
 
@@ -82,7 +90,11 @@ class Application(Frame):
 
         if command == None:
             command = self.retrieveInput()
+        if("\n" in command):
+                command = command.replace("\n", "")
         print("Sending Command: ")
+        
+        command = command + '$C'
         print(command)
         ser.write(bytes(command, "utf-8"))
 
