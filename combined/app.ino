@@ -19,6 +19,9 @@ bool isHTML;
 
 
 
+
+
+
 int value = 0;
 
 void getFile(String fileName, String filePath, String fileType){  
