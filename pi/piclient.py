@@ -1,0 +1,161 @@
+import time
+import serial
+from tkinter import *
+
+
+# Starts a serial port on the Raspberry Pi UART pins
+ser = serial.Serial(
+    port='/dev/ttyS0',  # Replace ttyS0 with ttyAM0 for Pi1,Pi2,Pi0
+    baudrate=115200,
+    parity=serial.PARITY_NONE,
+    stopbits=serial.STOPBITS_ONE,
+    bytesize=serial.EIGHTBITS,
+    timeout=0.01
+)
+
+# Correstponds to how often to check the serial port for incoming bits.
+# This is useful as the way the code is implimented using Tkinter allows process scheduling
+refreshRate = 4
+
+
+# This block pauses the program execution until the arduino is ready.
+startup = 0
+while startup == 0:
+    x = ser.readline()
+    decodedMessage = x.decode('utf-8')
+    if("ESP Ready" in decodedMessage):
+        startup = 1
+
+
+# Frontend User program class.
+# This class allows us to create a GUI application using tkinter.
+class Application(Frame):
+
+    # This method is responsible for communicating over the serial port with the arduino.
+    # It also handles the data based on what kind of communication it is.
+    # Currently there are 3 dataTypes, $D (data), $M (message), $C (command).
+    # Data is for numbers relating to sensor readings or other quantitative data.
+    # Messages are for general communications between the two devices, for debugging purposes.
+    # Commands are for changing parameters on either device to change how it operates.
+    def readSerial(self):
+
+        x = ser.readline()  # Reads in a line from the serial port.
+        # This if statement will only run if the read line x has non-zero length.
+        if(len(x) != 0):
+            # Converts from byte data to a utf-8 formatted string.
+            decodedMessage = x.decode('utf-8')
+            if("\n" in decodedMessage):
+                decodedMessage = decodedMessage.replace("\n", "")
+
+            dataType = 0
+
+            # The following block of code sorts the incoming message based on it's purpose.
+            # All aspects of this project utilise the same syntax of using a $ sign followed by a letter to denote a communication's purpose.
+            if("$D" in decodedMessage):
+                decodedMessage = decodedMessage.replace("$D", "")
+                dataType = "data"
+            if("$M" in decodedMessage):
+                decodedMessage = decodedMessage.replace("$M", "")
+                dataType = "message"
+            if("$C" in decodedMessage):
+                decodedMessage = decodedMessage.replace("$C", "")
+                dataType = "command"
+
+            if(decodedMessage != ''):
+                if(dataType == "data"):
+                    self.displayData.delete(1.0, END)
+                    self.displayData.insert(END, decodedMessage)
+                    print("[Data] " + decodedMessage)
+                    outfile = open("log.txt", "a")
+                    outfile.write(decodedMessage + "\n")
+                    outfile.close()
+                if(dataType == "message"):
+                    self.displayMessage.delete(1.0, END)
+                    self.displayMessage.insert(END, decodedMessage)
+                    print("[Message] " + decodedMessage)
+
+        self.after(refreshRate, self.readSerial)
+    # Method for sending a command from the text box to the arduino
+    # Works in conjunction with retrieveInput.
+
+    def sendCommand(self, command=None):
+
+        if command == None:
+            command = self.retrieveInput()
+        print("Sending Command: ")
+        print(command)
+        ser.write(bytes(command, "utf-8"))
+
+    # Method responsible for getting user input from the commandBox tkinter widget.
+    def retrieveInput(self):
+        input = self.commandBox.get(1.0, END)
+        self.commandBox.delete(1.0, END)
+        return input
+
+    # Placeholder method for testing connections to multiple wireless access points.
+    def serverConnect1(self):
+        print("Server 1")
+        command = "1$S\n"
+        self.sendCommand(command)
+
+    # Placeholder method for testing connections to multiple wireless access points.
+    def serverConnect2(self):
+        print("Server 2")
+        command = "2$S\n"
+        self.sendCommand(command)
+
+    # This method is responsible for creating all of the GUI through tkinter.
+    # This includes the GUI functionality.
+    def createWidgets(self):
+
+        self.QUIT = Button(self)
+        self.QUIT["text"] = "QUIT"
+        self.QUIT["fg"] = "red"
+        self.QUIT["command"] = self.quit
+        self.QUIT.pack({"side": "right"})
+
+        self.ser1Button = Button(self)
+        self.ser1Button["text"] = "Server 1"
+        self.ser1Button["command"] = self.serverConnect1
+        self.ser1Button.pack({"side": "left"})
+
+        self.ser2Button = Button(self)
+        self.ser2Button["text"] = "Server 2"
+        self.ser2Button["command"] = self.serverConnect2
+        self.ser2Button.pack({"side": "left"})
+
+        self.messageLabel = Label(self, text="Message\n\nData\n\nCommand")
+        self.messageLabel.pack(side=LEFT)
+
+        self.displayMessage = Text(self, height=2, width=36)
+        self.displayMessage.pack()
+
+        self.displayData = Text(self, height=2, width=36)
+        self.displayData.pack()
+
+        self.commandBox = Text(self, height=1, width=36)
+        self.commandBox.bind("<Return>")
+        self.commandBox.pack()
+
+        self.commandButton = Button(self)
+        self.commandButton["text"] = "Send"
+        self.commandButton["command"] = self.sendCommand
+        self.commandButton.pack()
+
+    # Initialise function, runs at the startup of the GUI.
+    def __init__(self, master=None):
+        Frame.__init__(self, master)
+        self.createWidgets()
+        self.readSerial()
+        self.pack()
+
+
+root = Tk()
+
+
+app = Application(master=root)
+
+
+app.mainloop()
+
+root.destroy()

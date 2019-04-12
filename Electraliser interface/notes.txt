@@ -1,0 +1,5 @@
+Set up iP as 192.168.1.x
+subnet: 255.255.255.0
+gateway 192.168.1.1
+
+

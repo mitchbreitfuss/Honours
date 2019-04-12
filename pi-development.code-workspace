@@ -1,0 +1,11 @@
+{
+	"folders": [
+		{
+			"path": "/run/user/1000/gvfs/sftp:host=raspberrypi,user=pi/home/pi/piclient"
+		},
+		{
+			"path": "switching"
+		}
+	],
+	"settings": {}
+}
