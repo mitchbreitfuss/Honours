@@ -49,7 +49,7 @@ class Application(Frame):
                     break
                 except UnicodeDecodeError:
                     decodedMessage = ''
-                    print("[Error] Decode Error from serial")
+                    #print("[Error] Decode Error from serial")
                     break
             if("\n" in decodedMessage):
                 decodedMessage = decodedMessage.replace("\n", "")
@@ -68,8 +68,22 @@ class Application(Frame):
             if("$C" in decodedMessage):
                 decodedMessage = decodedMessage.replace("$C", "")
                 dataType = "command"
+            if("$L" in decodedMessage):
+                decodedMessage = decodedMessage.replace("$L","")
+                dataType = "log"
 
             if(decodedMessage != ''):
+                if(dataType == "log"):
+                    self.displayMessage.delete(1.0, END)
+                    self.displayMessage.insert(END, decodedMessage)
+                    print("[Message] " + decodedMessage)
+                    outfile = open("log.txt", "a")
+                    outfile.write(decodedMessage + "    ")
+                if(dataType == "message"):
+                    self.displayMessage.delete(1.0, END)
+                    self.displayMessage.insert(END, decodedMessage)
+                    print("[Message] " + decodedMessage)
+
                 if(dataType == "data"):
                     self.displayData.delete(1.0, END)
                     self.displayData.insert(END, decodedMessage)
@@ -77,10 +91,7 @@ class Application(Frame):
                     outfile = open("log.txt", "a")
                     outfile.write(decodedMessage + "\n")
                     outfile.close()
-                if(dataType == "message"):
-                    self.displayMessage.delete(1.0, END)
-                    self.displayMessage.insert(END, decodedMessage)
-                    print("[Message] " + decodedMessage)
+                
 
         self.after(refreshRate, self.readSerial)
     # Method for sending a command from the text box to the arduino
@@ -93,8 +104,8 @@ class Application(Frame):
         if("\n" in command):
                 command = command.replace("\n", "")
         print("Sending Command: ")
-        
-        command = command + '$C'
+        if("$S" not in command):
+            command = command + '$C'
         print(command)
         ser.write(bytes(command, "utf-8"))
 
