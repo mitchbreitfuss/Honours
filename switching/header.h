@@ -1,4 +1,6 @@
 #include <Arduino.h>
+#include <SoftwareSerial.h>
+#include <ESP8266WiFi.h>
 
 /*  TODO
     Create a function that calls getData to reduce repeated code.
@@ -7,6 +9,34 @@
 */ 
 
 //////////////////////////////////////////
+SoftwareSerial COM(D5,D6);
+String option1;
+String option2;
+String option3;
+
+const char* ssid1     = "iiNet23F0A7";
+const char* password1 = "GK4EN4NAE695GFC";
+
+const char* ssid2     = "iPhone";
+const char* password2 = "cool1234";
+
+const char* host1 = "10.1.1.213";
+const char* streamId   = "....................";
+const char* privateKey = "....................";
+
+void send(float toSend){
+    COM.print(String(toSend) + "$D\n");
+    Serial.print("Sending data: ");
+    Serial.println(toSend);
+}
+
+void send(String toSend){
+   
+    COM.print(toSend+"$M\n");
+    
+    Serial.print("Sending message: ");
+    Serial.println(toSend);
+}
 
 typedef struct{
     int currentPower;
@@ -21,13 +51,52 @@ typedef struct{
 
 
 // }elecDataPacket;
+// This function scapes the web interface for a data value based on context flags
+String getData(String line, String searchFlag, int interface){
+    // Interface == 1 corresponds to the inverter
+    // Interface == 2 corresponds to the electrolyser 
 
+    String dataValue;
+    int sliceStart = line.indexOf(searchFlag);
+    int sliceEnd;
+
+
+    switch (interface){
+
+        case 1: // Solar Inverter
+            // Scrapes for Current Power value.
+            if(searchFlag == "Power Now:</td><td>"){
+                sliceEnd = line.indexOf("W</td></tr><tr");
+            }
+
+            // Scrapes for Today's Energy value.
+            if(searchFlag == "Today's Energy:</td><td>"){
+                sliceEnd = line.indexOf("kWh</td></tr><tr");
+            }
+
+            // Scrapes for Total Energy value.
+            if(searchFlag == "Total Energy:</td><td>"){
+                sliceEnd = line.indexOf("kWh</td></tr><tr class=\"tr2\"");
+            }
+            break;
+        case 2: // Electrolyser
+            break;
+        default:
+            break;
+    }
+
+    dataValue = line.substring(sliceStart+searchFlag.length(),sliceEnd);
+    
+    return dataValue;
+}
 
 //////////////////////////////////////////
 void getFile(String fileName, String fileType, String hostAdd, int interface){  
     int value;
     bool isHTML;
     String currentPower;
+    String energyToday;
+    String totalEnergy;
     Serial.print("Connecting to ");
     Serial.println(hostAdd);
 
@@ -70,10 +139,10 @@ void getFile(String fileName, String fileType, String hostAdd, int interface){
     // Read all the lines of the reply from server and print them to Serial
     String outfile = "";
     while(client.available()){
-    //delay(10);
+    delay(10);
     String line = client.readStringUntil('\n');
 
-    if(fileType == "html-data"){
+    if (fileType == "html-data"){
         if(line.indexOf("<html>")> -1){
 
             isHTML = true;
@@ -84,34 +153,51 @@ void getFile(String fileName, String fileType, String hostAdd, int interface){
         if(isHTML == true){
 
             if(interface == 1){ // If the target is the electrolyser this code will execute.
+                //Serial.println(line);
 
                 // These following if statements should be condensed to a function as it is repeated code.
                 if(line.indexOf("Power Now:</td><td>")>-1){
                     String searchFlag = "Power Now:</td><td>";
                     currentPower = getData(line,searchFlag,interface);
                     Serial.println();
-                    Serial.println("[Info] Current Power = ");
+                    Serial.print("[Info] Current Power = ");
                     Serial.println(currentPower);
+                    Serial.println();
+                    send("");
+                    send("Power Now$L");
+                    send(currentPower.toFloat());
                     client.stop();
-
                 }
 
                 if(line.indexOf("Today's Energy:</td><td>")>-1){
                     String searchFlag = "Today's Energy:</td><td>";
-                    currentPower = getData(line,searchFlag,interface);
+                    energyToday = getData(line,searchFlag,interface);
                     Serial.println();
-                    Serial.println("[Info] Today's Power = ");
-                    Serial.print(currentPower);
+                    Serial.print("[Info] Energy Today = ");
+                    Serial.println(energyToday);
                     Serial.println();
+                    send("Energy Today$L");
+                    send(energyToday.toFloat());
                     client.stop();
+                }
 
+                if(line.indexOf("Total Energy:</td><td>")>-1){
+                    String searchFlag = "Total Energy:</td><td>";
+                    totalEnergy = getData(line,searchFlag,interface);
+                    Serial.println();
+                    Serial.print("[Info] Total Energy = ");
+                    Serial.println(totalEnergy);
+                    Serial.println();
+                    send("Total Energy$L");
+                    send(totalEnergy.toFloat());
+                    client.stop();
                 }
             }
 
             //Serial.print(line);
             
             
-            COM.print("[HTML] " + line + "$M\n");
+            //COM.print("[HTML] " + line + "$M\n");
             outfile = outfile + line;
 
         }
@@ -162,56 +248,3 @@ void getFile(String fileName, String fileType, String hostAdd, int interface){
 
 
 
-// This function scapes the web interface for a data value based on context flags
-String getData(String line, String searchFlag, int interface){
-    // Interface == 1 corresponds to the inverter
-    // Interface == 2 corresponds to the electrolyser 
-
-    String dataValue;
-    int sliceStart = line.indexOf(searchFlag);
-    int sliceEnd;
-
-
-    switch (interface){
-
-        case 1: // Solar Inverter
-            // Scrapes for Current Power value.
-            if(searchFlag == "Power Now:</td><td>"){
-                sliceEnd = line.indexOf("W</td></tr><tr");
-            }
-
-            // Scrapes for Today's Energy value.
-            if(searchFlag == "Today's Energy:</td><td>"){
-                sliceEnd = line.indexOf("kWh</td></tr><tr");
-            }
-
-            // Scrapes for Total Energy value.
-            if(searchFlag == "Total Energy:</td><td>"){
-                sliceEnd = line.indexOf("kWh</td></tr><tr");
-            }
-            break;
-        case 2: // Electrolyser
-            break;
-        default:
-            break;
-    }
-
-    dataValue = line.substring(sliceStart+searchFlag.length(),line.indexOf(sliceEnd));
-
-    return dataValue;
-}
-
-
-void send(float toSend){
-    COM.print(String(toSend) + "$D");
-  
-    Serial.println(toSend);
-}
-
-void send(String toSend){
-   
-    COM.print(toSend+"$M");
-    
-    Serial.print("Sending message: ");
-    Serial.println(toSend);
-}
