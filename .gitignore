@@ -1,2 +1,3 @@
 .*
 !/.gitignore
+pi/__pycache__/monitor.cpython-37.pyc
