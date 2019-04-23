@@ -2,22 +2,7 @@
 #include <ESP8266WiFi.h>
 #include "header.h"
 
-const char* ssid1     = "Breitfuss";
-const char* password1 = "mitchell";
 
-const char* ssid2     = "iPhone";
-const char* password2 = "cool1234";
-
-const char* host1 = "10.1.1.213";
-const char* streamId   = "....................";
-const char* privateKey = "....................";
-
-
-
-
-
-
-SoftwareSerial COM(D5,D6);
 //connect Serial TX to D5
 //connect Serial RX to D6
 
@@ -33,9 +18,7 @@ String recieved;
 float data = 3.1415;
 int recieve = 0;
 
-String option1;
-String option2;
-String option3;
+
 
 void setup()
 {
@@ -58,8 +41,9 @@ float toSend = 3.14;
 void loop(){
 
 
-    if(Serial.available()){
-        String recieved = Serial.readStringUntil('\n');
+    if(COM.available()){
+        String recieved = COM.readStringUntil('\n');
+        
         
         if(recieved.indexOf("$C")>0){
             recieved.replace("$C","");
@@ -83,25 +67,28 @@ void loop(){
     }
 
     delay(100);
-    toSend = toSend + 0.01;
-    Serial.print(String(toSend)+"$D\n");
+    // toSend = toSend + 0.01;
+    // Serial.print(String(toSend)+"$D\n");
+    // send(toSend);
     
 
     switch (server){
         case 1:
             // This corresponds to the inverter.
+            send("Connecting to the Inverter...");
             WiFi.begin(ssid1,password1);
 
             while(WiFi.status() != WL_CONNECTED){
                 delay(100);
                 Serial.print(".");
+                
 
             }
             Serial.println();
             Serial.println("Connected to AP 1");
             Serial.println("Wifi Connected\n IP Address: " + WiFi.localIP());
             Serial.println("Success! Connected to server " + server);
-            getFile("Monitor%20Page.html","html-data","10.0.0.100",server);
+            getFile("MonitorPage.html","html-data","10.1.1.213",server);
 
             server = 0;
             WiFi.disconnect();
@@ -123,6 +110,7 @@ void loop(){
             
         case 0:
             Serial.println("[Info] Idle, ready for command");
+            COM.println("[Arduino]Idle, ready for command.");
             server = -1;
             break;
         case -1:
