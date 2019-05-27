@@ -14,8 +14,11 @@ String option1;
 String option2;
 String option3;
 
-const char* ssid1     = "iiNet23F0A7";
-const char* password1 = "GK4EN4NAE695GFC";
+// const char* ssid1     = "iiNet23F0A7";
+// const char* password1 = "GK4EN4NAE695GFC";
+const char* ssid1     = "Solax_AA870E88";
+const char* password1 = "";
+
 
 const char* ssid2     = "iPhone";
 const char* password2 = "cool1234";
@@ -23,6 +26,9 @@ const char* password2 = "cool1234";
 const char* host1 = "10.1.1.213";
 const char* streamId   = "....................";
 const char* privateKey = "....................";
+
+const char* hostInverter;
+
 
 void send(float toSend){
     COM.print(String(toSend) + "$D\n");
@@ -102,13 +108,16 @@ void getFile(String fileName, String fileType, String hostAdd, int interface){
 
     // Use WiFiClient class to create TCP connections
     WiFiClient client;
-    const int httpPort = 8000;
+    const int httpPort = 80;
 
     if (!client.connect(hostAdd, httpPort)) {
         Serial.println("connection failed");
     return;
     }
+    
+    delay(500);
     client.println(String("GET /") + fileName + " HTTP/1.1");
+    
 
     // We now create a URI for the request
     String url = "/input/";
@@ -122,10 +131,16 @@ void getFile(String fileName, String fileType, String hostAdd, int interface){
     Serial.println(url);
 
     // This will send the request to the server
-    client.print(String("GET /")+ fileName + url + " HTTP/1.1\r\n" +
-                "Host: " + hostAdd + "\r\n" + 
-                "Connection: close\r\n\r\n");
+
+    client.print(String("GET /")+ fileName + url + " HTTP/1.1\r\n");
     Serial.println(String("Requesting ") + fileName);
+    client.print("Authorization: ");
+    client.println("Basic YWRtaW46YWRtaW4=");
+    client.println();
+    delay(2000);
+    
+    
+    
     unsigned long timeout = millis();
     while (client.available() == 0) {
     if (millis() - timeout > 5000) {
@@ -141,6 +156,7 @@ void getFile(String fileName, String fileType, String hostAdd, int interface){
     while(client.available()){
     delay(10);
     String line = client.readStringUntil('\n');
+    Serial.println(line);
 
     if (fileType == "html-data"){
         if(line.indexOf("<html>")> -1){

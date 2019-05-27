@@ -53,7 +53,6 @@ class Application(Frame):
                     break
             if("\n" in decodedMessage):
                 decodedMessage = decodedMessage.replace("\n", "")
-                
 
             dataType = 0
 
@@ -69,7 +68,7 @@ class Application(Frame):
                 decodedMessage = decodedMessage.replace("$C", "")
                 dataType = "command"
             if("$L" in decodedMessage):
-                decodedMessage = decodedMessage.replace("$L","")
+                decodedMessage = decodedMessage.replace("$L", "")
                 dataType = "log"
 
             if(decodedMessage != ''):
@@ -91,7 +90,6 @@ class Application(Frame):
                     outfile = open("log.txt", "a")
                     outfile.write(decodedMessage + "\n")
                     outfile.close()
-                
 
         self.after(refreshRate, self.readSerial)
     # Method for sending a command from the text box to the arduino
@@ -102,7 +100,7 @@ class Application(Frame):
         if command == None:
             command = self.retrieveInput()
         if("\n" in command):
-                command = command.replace("\n", "")
+            command = command.replace("\n", "")
         print("Sending Command: ")
         if("$S" not in command):
             command = command + '$C'

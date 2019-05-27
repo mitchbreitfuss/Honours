@@ -75,6 +75,7 @@ void loop(){
     switch (server){
         case 1:
             // This corresponds to the inverter.
+            Serial.println("Connecting to the Inverter...");
             send("Connecting to the Inverter...");
             WiFi.begin(ssid1,password1);
 
@@ -88,7 +89,7 @@ void loop(){
             Serial.println("Connected to AP 1");
             Serial.println("Wifi Connected\n IP Address: " + WiFi.localIP());
             Serial.println("Success! Connected to server " + server);
-            getFile("MonitorPage.html","html-data","10.1.1.213",server);
+            getFile("monitor.htm","html-data","11.11.11.1",server);
 
             server = 0;
             WiFi.disconnect();
