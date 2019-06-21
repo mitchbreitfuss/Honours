@@ -7,3 +7,9 @@ Total Energy    1019.90
 Power Now    0.00
 Energy Today    0.00
 Total Energy    1019.90
+Power Now    1709.00
+Energy Today    7.20
+Total Energy    1141.70
+Power Now    1709.00
+Energy Today    7.20
+Total Energy    1141.70
