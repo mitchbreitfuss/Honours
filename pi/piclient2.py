@@ -93,7 +93,7 @@ def readSerial():
 # Method for sending a command from the text box to the arduino
 # Works in conjunction with retrieveInput.
 
-def sendCommand(command=None):
+def sendCommand(_event=None,command=None):
 
     if command == None:
         command = retrieveInput()
@@ -107,8 +107,8 @@ def sendCommand(command=None):
 
     # Method responsible for getting user input from the commandBox tkinter widget.
 def retrieveInput():
-    input = commandBox.get(1.0, END)
-    self.commandBox.delete(1.0, END)
+    input = app.commandBox.get(1.0, END)
+    app.commandBox.delete(1.0, END)
     return input
 
     # Placeholder method for testing connections to multiple wireless access points.
@@ -142,6 +142,9 @@ class Application(Frame):
     # Data is for numbers relating to sensor readings or other quantitative data.
     # Messages are for general communications between the two devices, for debugging purposes.
     # Commands are for changing parameters on either device to change how it operates.
+    
+    
+    
     
     
     
@@ -186,8 +189,9 @@ class Application(Frame):
         self.commandBox.grid(row=6,column=3)
 
         self.commandButton = Button(self,text="Send",command=sendCommand)
+        
         self.commandButton.grid(row=6,column=4)
-         
+        self.master.bind("<Return>",sendCommand)
        #Old pack based GUI code
 ##        self.QUIT.pack({"side": "right"})
 ##
@@ -222,6 +226,7 @@ class Application(Frame):
     # Initialise function, runs at the startup of the GUI.
     def __init__(self, master=None):
         Frame.__init__(self, master)
+        
         self.grid()
         self.createWidgets()
         
