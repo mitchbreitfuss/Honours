@@ -25,8 +25,11 @@ class PiMonitor(flx.HFix):
     @flx.reaction('server1_button.pointer_click')
     def server1_clicked(self,*events):
         self.test_label.set_text("Clicked")
-        piclient.testfunction()
-        
+        piclient.serverConnect1()
+
+    @flx.reaction('server2_button.pointer_click')
+    def server2_clicked(self,*events):
+        piclient.serverConnect2()
         
 
 
