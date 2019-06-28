@@ -1,14 +1,13 @@
 import os
 import time
-
+import csv
 SERIAL_AVAILABLE = True
 try: import serial
 except:
     SERIAL_AVAILABLE = False
 from tkinter import *
-
-
-
+from flexx import flx
+import flxtest
 
 
 # try:
@@ -107,8 +106,6 @@ def readSerial():
     self.after(refreshRate, self.readSerial)
 
 
-
-
 def sendCommand(command=None):
 # Method for sending a command from the text box to the arduino
 # Works in conjunction with retrieveInput.
@@ -144,8 +141,7 @@ def CLI():
     while True:
         input = input("Enter command to run: ")
 
-def testfunction():
-    print("This is a test")
+
 # Insert a command dictionary here to allow running commands from the commandline.
 # Considder using a shared header file between the Pi and Arduinos so when new functionality is added it is simpler to impliment.
 
@@ -158,18 +154,21 @@ class Application(Frame):
     AUTO_MODE = True
 
         # Initialise function, runs at the startup of the GUI.
-    def __init__(self, master=None):
-        Frame.__init__(self, master)
+    def __init__(self, parent=None):
+        Frame.__init__(self, parent)
         self.grid()
         self.createWidgets()
-
+    def flexxcall(self):
+        app = flx.App(flxtest.TempGraph)
+        app.launch('app')
+        flx.run()
 
 
     # This method is responsible for creating all of the GUI through tkinter.
     # This includes the GUI functionality.
     def createWidgets(self):
         # Below the GUI elements are created  
-        
+        self.winfo_toplevel().title("Pi Client")
         # Server 1 Connect Button  
         self.ser1Button = Button(self,text="Server 1",command=serverConnect1)
         self.ser1Button.grid(row=0,column=0)
@@ -195,7 +194,7 @@ class Application(Frame):
         self.displayData.grid(row=1,column=3)
 
         # Quit Button
-        self.QUIT = Button(self,text = "QUIT",command=self.quit)
+        self.QUIT = Button(self,text = "QUIT",command=self.quit,fg='red')
         self.QUIT.grid(row=0,column=4)
 
         # Command Box Label
@@ -210,7 +209,10 @@ class Application(Frame):
         self.commandButton = Button(self,text="Send",command=sendCommand)
         self.commandButton.grid(row=6,column=4)
         self.master.bind("<Return>",sendCommand) # Bind return key to send the command for better UX
-
+        
+        # Flexx Button
+        self.flxButton = Button(self,text="Flexx",command=self.flexxcall)
+        self.flxButton.grid(row=6,column=6)
        #Old pack based GUI code
 ##        self.QUIT.pack({"side": "right"})
 ##
@@ -248,10 +250,16 @@ def start_app():
     master = Tk()
 
     # Set Application object to variable app.
-    app = Application()
+    app = Application(master)
 
     # Runs the application loop. (Tkinter)
-    app.mainloop()
+    master.mainloop()
 
     # Garbage collection for when the mainloop is stopped.
     #master.destroy()
+
+
+
+
+
+start_app()
