@@ -1,23 +1,29 @@
 import os
 import time
-import serial
+
+SERIAL_AVAILABLE = True
+try: import serial
+except:
+    SERIAL_AVAILABLE = False
+
 from tkinter import *
 
-try:
-    print(os.environ['DISPLAY'])
-except(KeyError):
-    print("No X Display running")
-    HEADLESS = True
-    exit()
+# try:
+#     print(os.environ['DISPLAY'])
+# except(KeyError):
+#     print("No X Display running")
+#     HEADLESS = True
+#     exit()
 # Starts a serial port on the Raspberry Pi UART pins
-ser = serial.Serial(
-    port='/dev/ttyS0',  # Replace ttyS0 with ttyAM0 for Pi1,Pi2,Pi0
-    baudrate=115200,
-    parity=serial.PARITY_NONE,
-    stopbits=serial.STOPBITS_ONE,
-    bytesize=serial.EIGHTBITS,
-    timeout=0.01
-)
+if(SERIAL_AVAILABLE == True):
+    ser = serial.Serial(
+        port='/dev/ttyS0',  # Replace ttyS0 with ttyAM0 for Pi1,Pi2,Pi0
+        baudrate=115200,
+        parity=serial.PARITY_NONE,
+        stopbits=serial.STOPBITS_ONE,
+        bytesize=serial.EIGHTBITS,
+        timeout=0.01
+    )
 
 # Correstponds to how often to check the serial port for incoming bits.
 # This is useful as the way the code is implimented using Tkinter allows process scheduling
@@ -115,8 +121,7 @@ def sendCommand(_event=None,command=None):
 
 # Method responsible for getting user input from the commandBox tkinter widget.
 def retrieveInput():
-    input = app.commandBox.get(1.0, END)
-    app.commandBox.delete(1.0, END)
+    input = "input text"
     return input
 
 # Placeholder method for testing connections to multiple wireless access points.
@@ -135,6 +140,9 @@ def serverConnect2():
 def CLI():
     while True:
         input = input("Enter command to run: ")
+
+def testfunction():
+    print("This is a test")
 # Insert a command dictionary here to allow running commands from the commandline.
 # Considder using a shared header file between the Pi and Arduinos so when new functionality is added it is simpler to impliment.
 
@@ -232,18 +240,16 @@ class Application(Frame):
 ##        self.commandButton.pack()
 
 
+def start_app():
+    # Initialise tkinter.
+    master = Tk()
 
+    # Set Application object to variable app.
+    app = Application()
 
+    # Runs the application loop. (Tkinter)
+    app.mainloop()
 
+    # Garbage collection for when the mainloop is stopped.
+    #master.destroy()
 
-# Initialise tkinter.
-master = Tk()
-
-# Set Application object to variable app.
-app = Application()
-
-# Runs the application loop. (Tkinter)
-app.mainloop()
-
-# Garbage collection for when the mainloop is stopped.
-master.destroy()
