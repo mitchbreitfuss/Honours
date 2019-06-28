@@ -1,14 +1,10 @@
 '''Flexx test file'''
 from flexx import flx
 import piclient
-import os
-import time
-try: import serial
-except:
+
+
+class testclass():
     pass
-
-from tkinter import *
-
 
 class PiMonitor(flx.HFix):
 
@@ -17,10 +13,10 @@ class PiMonitor(flx.HFix):
             self.server1_button = flx.Button(text="Server 1")
             self.server2_button = flx.Button(text="Server 2")
 
-
-        message_label = flx.Label(text="Message")
-        data_label = flx.Label(text="Data")
-        command_label = flx.Label(text="Command")
+        with flx.VBox():
+            message_label = flx.Label(text="Message")
+            data_label = flx.Label(text="Data")
+            command_label = flx.Label(text="Command")
         self.test_label = flx.Label(text="")
 
         
@@ -29,8 +25,7 @@ class PiMonitor(flx.HFix):
     @flx.reaction('server1_button.pointer_click')
     def server1_clicked(self,*events):
         self.test_label.set_text("Clicked")
-        
-        piclient.serverConnect1()
+        piclient.testfunction()
         
         
 

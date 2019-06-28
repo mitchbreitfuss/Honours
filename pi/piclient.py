@@ -5,8 +5,11 @@ SERIAL_AVAILABLE = True
 try: import serial
 except:
     SERIAL_AVAILABLE = False
-
 from tkinter import *
+
+
+
+
 
 # try:
 #     print(os.environ['DISPLAY'])
@@ -106,7 +109,7 @@ def readSerial():
 
 
 
-def sendCommand(_event=None,command=None):
+def sendCommand(command=None):
 # Method for sending a command from the text box to the arduino
 # Works in conjunction with retrieveInput.
     if command == None:
@@ -252,4 +255,3 @@ def start_app():
 
     # Garbage collection for when the mainloop is stopped.
     #master.destroy()
-
