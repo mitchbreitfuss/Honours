@@ -3,7 +3,7 @@ from flexx import flx
 import csv
 
 months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul',
-            'Aug', 'Sep', 'Oct', 'Nov', 'Dec', 'total']
+                    'Aug', 'Sep', 'Oct', 'Nov', 'Dec', 'total']
 
 
 logfile_names = ["electrolyser.csv","inverter.csv"]
@@ -15,10 +15,10 @@ for i in range(0,2):
     with open(logfile_names[i]) as csv_file:
         csv_reader = csv.reader(csv_file,delimiter=',')
         line_count = 0
-        
+                
         for row in csv_reader:
             if line_count == 0:
-                print(f'Column names are {",".join(row)}')
+                #print(f'Column names are {",".join(row)}')
                 line_count+=1
             else:
                 print("Appeding")
@@ -37,60 +37,14 @@ for i in range(0,2):
         rownumber+=1
 
 
-def date_data(date):
-    '''This function parses the data list to obtain all the relevent data for a specified date. This includes both temp and times, so if the amount of recordings is not the same between any given days, it will still work.'''
-    
 
-    timeselectrolyser = []
-    flowselectrolyser = []
-    H2Totalselectrolyser = []
-    voltageselectrolyser = []
-    pressureselectrolyser = []
-    tempselectrolyser = []
-
-    timesinverter = []
-    currentPowerInverter = []
-    energyTodayInverter = []
-    totalEnergyInverter = []
-
-
-    times = [timeselectrolyser,timesinverter]
-
- 
-    
-    rownumber=0
-
-    for i in range(0,2):
-        rownumber = 0
-        workingdata = data[i]
-        for row in workingdata:
-
-            if i == 0:
-                if(date == workingdata[rownumber][0]):
-                    times[i].append(workingdata[rownumber][1])
-                    flowselectrolyser.append(workingdata[rownumber][2])
-                    H2Totalselectrolyser.append(workingdata[rownumber][3])
-                    voltageselectrolyser.append(workingdata[rownumber][4])
-                    pressureselectrolyser.append(workingdata[rownumber][5])
-                    tempselectrolyser.append(workingdata[rownumber][6])
-            if i == 1:
-                if(date == workingdata[rownumber][0]):
-                    times[i].append(workingdata[rownumber][1])
-                    currentPowerInverter.append(workingdata[rownumber][2])
-                    energyTodayInverter.append(workingdata[rownumber][3])
-                    totalEnergyInverter.append(workingdata[rownumber][4])
-
-            rownumber += 1
-    electrolyserParameters = [flowselectrolyser,H2Totalselectrolyser,voltageselectrolyser,pressureselectrolyser,tempselectrolyser]
-    inverterParameters = [currentPowerInverter,energyTodayInverter,totalEnergyInverter]
-    return times, electrolyserParameters, inverterParameters
-
-[testtimes,testelec,testinv] = date_data('2019_06_25')
-print("STOP")
 
 # This class is responsible for plotting the graph of a temperature readout.
 class TempGraph(flx.Widget):
     def init(self):
+        
+
+        
         with flx.HFix():
             flx.Widget(flex=1)
             with flx.VBox(flex=0, minsize=200):
@@ -150,3 +104,51 @@ class TempGraph(flx.Widget):
         self.invpowerplot.set_data(date_data(self.date.selected_key)[0][1], date_data(self.date.selected_key)[2][0])
         self.invenergyplot.set_data(date_data(self.date.selected_key)[0][1], date_data(self.date.selected_key)[2][1])
         self.invtotalenergyplot.set_data(date_data(self.date.selected_key)[0][1], date_data(self.date.selected_key)[2][2])
+
+def date_data(date):
+    '''This function parses the data list to obtain all the relevent data for a specified date. This includes both temp and times, so if the amount of recordings is not the same between any given days, it will still work.'''
+    
+
+    timeselectrolyser = []
+    flowselectrolyser = []
+    H2Totalselectrolyser = []
+    voltageselectrolyser = []
+    pressureselectrolyser = []
+    tempselectrolyser = []
+
+    timesinverter = []
+    currentPowerInverter = []
+    energyTodayInverter = []
+    totalEnergyInverter = []
+
+
+    times = [timeselectrolyser,timesinverter]
+
+ 
+    
+    rownumber=0
+
+    for i in range(0,2):
+        rownumber = 0
+        workingdata = data[i]
+        for row in workingdata:
+
+            if i == 0:
+                if(date == workingdata[rownumber][0]):
+                    times[i].append(workingdata[rownumber][1])
+                    flowselectrolyser.append(workingdata[rownumber][2])
+                    H2Totalselectrolyser.append(workingdata[rownumber][3])
+                    voltageselectrolyser.append(workingdata[rownumber][4])
+                    pressureselectrolyser.append(workingdata[rownumber][5])
+                    tempselectrolyser.append(workingdata[rownumber][6])
+            if i == 1:
+                if(date == workingdata[rownumber][0]):
+                    times[i].append(workingdata[rownumber][1])
+                    currentPowerInverter.append(workingdata[rownumber][2])
+                    energyTodayInverter.append(workingdata[rownumber][3])
+                    totalEnergyInverter.append(workingdata[rownumber][4])
+
+            rownumber += 1
+    electrolyserParameters = [flowselectrolyser,H2Totalselectrolyser,voltageselectrolyser,pressureselectrolyser,tempselectrolyser]
+    inverterParameters = [currentPowerInverter,energyTodayInverter,totalEnergyInverter]
+    return times, electrolyserParameters, inverterParameters
