@@ -23,7 +23,7 @@ int recieve = 0;
 void setup()
 {
     delay(1000);
-    int baud = 115200;
+    int baud = 9600;
     Serial.begin(baud);
 	COM.begin(baud);
 
@@ -40,10 +40,12 @@ int server = 0;
 float toSend = 3.14;
 void loop(){
 
-
+    Serial.println("TOP OF LOOP");
     if(COM.available()){
+        delay(100);
         String recieved = COM.readStringUntil('\n');
-        
+        delay(100);
+        Serial.println(recieved);
         
         if(recieved.indexOf("$C")>0){
             recieved.replace("$C","");
@@ -75,22 +77,8 @@ void loop(){
     switch (server){
         case 1:
             // This corresponds to the inverter.
-            Serial.println("Connecting to the Inverter...");
-            send("Connecting to the Inverter...");
-            WiFi.begin(ssid1,password1);
-
-            while(WiFi.status() != WL_CONNECTED){
-                delay(100);
-                Serial.print(".");
-                
-
-            }
-            Serial.println();
-            Serial.println("Connected to AP 1");
-            Serial.println("Wifi Connected\n IP Address: " + WiFi.localIP());
-            Serial.println("Success! Connected to server " + server);
-            getFile("monitor.htm","html-data","11.11.11.1",server);
-
+            serverConnect(1);
+            
             server = 0;
             WiFi.disconnect();
             break;
@@ -115,6 +103,7 @@ void loop(){
             server = -1;
             break;
         case -1:
+            Serial.println("server = -1");
             break;
     }
         
