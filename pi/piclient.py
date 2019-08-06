@@ -1,5 +1,6 @@
 import os
 import time
+import datetime
 import csv
 SERIAL_AVAILABLE = True
 try: import serial
@@ -79,17 +80,47 @@ def readSerial():
         if("$C" in decodedMessage):
             decodedMessage = decodedMessage.replace("$C", "")
             dataType = "command"
-        if("$L" in decodedMessage):
+        if("$L1" in decodedMessage):
             decodedMessage = decodedMessage.replace("$L", "")
-            dataType = "log"
+            dataType = "INVERTERLOG"
+        if("$L2" in decodedMessage):
+            decodedMessage = decodedMessage.replace("$L", "")
+            dataType = "ELECTROLYSERLOG"
+
+        if(decodedMessage==101):
+            WRITE_DATETIME = 1
+            RECIEVING_ELECTROLYSER = 1
+
+        if(WRITE_DATETIME == 1):
+            outfile = open("inverter2.csv", "a")
+            now = datetime.datetime.now()
+            date = str(now.year) + "_" + str(now.month) + "_" + str(now.day)
+            time = str(now.hour) + str(now.minute)
+            outfile.write(date+ ",")
+            outfile.write(time + ",")
+            WRITE_DATETIME = 0;
+
+        if(decodedMessage==102):
+            RECIEVING_ELECTROLYSER = 0
 
         if(decodedMessage != ''):
-            if(dataType == "log"):
+            if(dataType == "INVERTERLOG"):
+                
+                if(RECIEVING_ELECTROLYSER ==1):
+                    self.displayMessage.delete(1.0, END)
+                    self.displayMessage.insert(END, decodedMessage)
+                    outfile = open("inverter.csv", "a")
+                    outfile.write(decodedMessage + ",")
+
+
+                
+            if(dataType == "ELECTROLYSERLOG"):
                 self.displayMessage.delete(1.0, END)
                 self.displayMessage.insert(END, decodedMessage)
                 print("[Message] " + decodedMessage)
-                outfile = open("log.txt", "a")
+                outfile = open("electrolyser.csv", "a")
                 outfile.write(decodedMessage + "    ")
+            if(dataType == "message"):
             if(dataType == "message"):
                 self.displayMessage.delete(1.0, END)
                 self.displayMessage.insert(END, decodedMessage)
@@ -144,7 +175,14 @@ def CLI():
 
 # Insert a command dictionary here to allow running commands from the commandline.
 # Considder using a shared header file between the Pi and Arduinos so when new functionality is added it is simpler to impliment.
+# COMMAND   CODE
+# Connect1  1$S
+# Connect2  2$S
+# Log Data  100$C
 
+
+def logData():
+    sendCommand(command='100$C')
 
 
 
