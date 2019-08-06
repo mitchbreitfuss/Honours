@@ -21,7 +21,7 @@ import flxtest
 if(SERIAL_AVAILABLE == True):
     ser = serial.Serial(
         port='/dev/ttyS0',  # Replace ttyS0 with ttyAM0 for Pi1,Pi2,Pi0
-        baudrate=115200,
+        baudrate=9600,
         parity=serial.PARITY_NONE,
         stopbits=serial.STOPBITS_ONE,
         bytesize=serial.EIGHTBITS,
@@ -44,97 +44,6 @@ while startup == 0:
 
 # Frontend User program class.
 # This class allows us to create a GUI application using tkinter.
-def readSerial():
-        # This method is responsible for communicating over the serial port with the arduino.
-    # It also handles the data based on what kind of communication it is.
-    # Currently there are 3 dataTypes, $D (data), $M (message), $C (command).
-    # Data is for numbers relating to sensor readings or other quantitative data.
-    # Messages are for general communications between the two devices, for debugging purposes.
-    # Commands are for changing parameters on either device to change how it operates.
-    x = ser.readline()  # Reads in a line from the serial port.
-
-    # This if statement will only run if the read line x has non-zero length.
-    if(len(x) != 0):
-        # Converts from byte data to a utf-8 formatted string.
-        while True:
-            try:
-                decodedMessage = x.decode('utf-8')
-                break
-            except UnicodeDecodeError:
-                decodedMessage = ''
-                #print("[Error] Decode Error from serial")
-                break
-        if("\n" in decodedMessage):
-            decodedMessage = decodedMessage.replace("\n", "")
-
-        dataType = 0
-
-        # The following block of code sorts the incoming message based on it's purpose.
-        # All aspects of this project utilise the same syntax of using a $ sign followed by a letter to denote a communication's purpose.
-        if("$D" in decodedMessage):
-            decodedMessage = decodedMessage.replace("$D", "")
-            dataType = "data"
-        if("$M" in decodedMessage):
-            decodedMessage = decodedMessage.replace("$M", "")
-            dataType = "message"
-        if("$C" in decodedMessage):
-            decodedMessage = decodedMessage.replace("$C", "")
-            dataType = "command"
-        if("$L1" in decodedMessage):
-            decodedMessage = decodedMessage.replace("$L", "")
-            dataType = "INVERTERLOG"
-        if("$L2" in decodedMessage):
-            decodedMessage = decodedMessage.replace("$L", "")
-            dataType = "ELECTROLYSERLOG"
-
-        if(decodedMessage==101):
-            WRITE_DATETIME = 1
-            RECIEVING_ELECTROLYSER = 1
-
-        if(WRITE_DATETIME == 1):
-            outfile = open("inverter2.csv", "a")
-            now = datetime.datetime.now()
-            date = str(now.year) + "_" + str(now.month) + "_" + str(now.day)
-            time = str(now.hour) + str(now.minute)
-            outfile.write(date+ ",")
-            outfile.write(time + ",")
-            WRITE_DATETIME = 0;
-
-        if(decodedMessage==102):
-            RECIEVING_ELECTROLYSER = 0
-
-        if(decodedMessage != ''):
-            if(dataType == "INVERTERLOG"):
-                
-                if(RECIEVING_ELECTROLYSER ==1):
-                    self.displayMessage.delete(1.0, END)
-                    self.displayMessage.insert(END, decodedMessage)
-                    outfile = open("inverter.csv", "a")
-                    outfile.write(decodedMessage + ",")
-
-
-                
-            if(dataType == "ELECTROLYSERLOG"):
-                self.displayMessage.delete(1.0, END)
-                self.displayMessage.insert(END, decodedMessage)
-                print("[Message] " + decodedMessage)
-                outfile = open("electrolyser.csv", "a")
-                outfile.write(decodedMessage + "    ")
-            if(dataType == "message"):
-            if(dataType == "message"):
-                self.displayMessage.delete(1.0, END)
-                self.displayMessage.insert(END, decodedMessage)
-                print("[Message] " + decodedMessage)
-
-            if(dataType == "data"):
-                self.displayData.delete(1.0, END)
-                self.displayData.insert(END, decodedMessage)
-                print("[Data] " + decodedMessage)
-                outfile = open("log.txt", "a")
-                outfile.write(decodedMessage + "\n")
-                outfile.close()
-
-    self.after(refreshRate, self.readSerial)
 
 
 def sendCommand(command=None):
@@ -196,11 +105,109 @@ class Application(Frame):
         Frame.__init__(self, parent)
         self.grid()
         self.createWidgets()
+        self.readSerial()
     def flexxcall(self):
         app = flx.App(flxtest.TempGraph)
         app.launch('app')
         flx.run()
+    Frame.RECIEVING_INVERTER = 0
+    def readSerial(self):
+            # This method is responsible for communicating over the serial port with the arduino.
+        # It also handles the data based on what kind of communication it is.
+        # Currently there are 3 dataTypes, $D (data), $M (message), $C (command).
+        # Data is for numbers relating to sensor readings or other quantitative data.
+        # Messages are for general communications between the two devices, for debugging purposes.
+        # Commands are for changing parameters on either device to change how it operates.
+        x = ser.readline()  # Reads in a line from the serial port.
+        #print(x)
+        WRITE_DATETIME=0
+        
+        # This if statement will only run if the read line x has non-zero length.
+        if(len(x) != 0):
+            # Converts from byte data to a utf-8 formatted string.
+            while True:
+                try:
+                    decodedMessage = x.decode('utf-8')
+                    break
+                except UnicodeDecodeError:
+                    decodedMessage = ''
+                    #print("[Error] Decode Error from serial")
+                    break
+            if("\n" in decodedMessage):
+                decodedMessage = decodedMessage.replace("\n", "")
 
+            dataType = 0
+
+            # The following block of code sorts the incoming message based on it's purpose.
+            # All aspects of this project utilise the same syntax of using a $ sign followed by a letter to denote a communication's purpose.
+            if("$D" in decodedMessage):
+                decodedMessage = decodedMessage.replace("$D", "")
+                dataType = "data"
+            if("$M" in decodedMessage):
+                decodedMessage = decodedMessage.replace("$M", "")
+                dataType = "message"
+            if("$C" in decodedMessage):
+                decodedMessage = decodedMessage.replace("$C", "")
+                dataType = "command"
+            if("$L1" in decodedMessage):
+                
+                decodedMessage = decodedMessage.replace("$L1", "")
+                dataType = "INVERTERLOG"
+            if("$L2" in decodedMessage):
+                decodedMessage = decodedMessage.replace("$L", "")
+                dataType = "ELECTROLYSERLOG"
+            print(decodedMessage)
+
+            if(decodedMessage=="101.00"):
+                print("Writing Date and Time")
+                WRITE_DATETIME = 1
+                Frame.RECIEVING_INVERTER = 1
+                decodedMessage = ''
+
+            if(WRITE_DATETIME == 1):
+                outfile = open("inverter.csv", "a")
+                now = datetime.datetime.now()
+                date = str(now.year) + "_" + str(now.month) + "_" + str(now.day)
+                time = str(now.hour) + str(now.minute)
+                outfile.write("\n"+date+ ",")
+                outfile.write(time + ",")
+                WRITE_DATETIME = 0;
+                outfile.close()
+
+            if(decodedMessage=="102.00"):
+                Frame.RECIEVING_INVERTER = 0
+
+            if(decodedMessage != ''):
+                if(dataType == "INVERTERLOG"):
+                    print("RECIEVING_INVERTER = " + str(Frame.RECIEVING_INVERTER))
+                    if(Frame.RECIEVING_INVERTER ==1):
+                        print("Writing to CSV")
+                        outfile = open("inverter.csv", "a")
+                        outfile.write(decodedMessage + ",")
+
+
+                    
+                if(dataType == "ELECTROLYSERLOG"):
+                    self.displayMessage.delete(1.0, END)
+                    self.displayMessage.insert(END, decodedMessage)
+                    print("[Message] " + decodedMessage)
+                    outfile = open("electrolyser.csv", "a")
+                    outfile.write(decodedMessage + "    ")
+      
+                if(dataType == "message"):
+                    self.displayMessage.delete(1.0, END)
+                    self.displayMessage.insert(END, decodedMessage)
+                    print("[Message] " + decodedMessage)
+
+                if(dataType == "data"):
+                    self.displayData.delete(1.0, END)
+                    self.displayData.insert(END, decodedMessage)
+                    print("[Data] " + decodedMessage)
+                    outfile = open("log.txt", "a")
+                    outfile.write(decodedMessage + "\n")
+                    outfile.close()
+
+        self.after(refreshRate, self.readSerial)
 
     # This method is responsible for creating all of the GUI through tkinter.
     # This includes the GUI functionality.
@@ -289,6 +296,8 @@ def start_app():
 
     # Set Application object to variable app.
     app = Application(master)
+
+
 
     # Runs the application loop. (Tkinter)
     master.mainloop()
