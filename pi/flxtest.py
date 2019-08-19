@@ -4,46 +4,46 @@ import csv
 
 months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul',
                     'Aug', 'Sep', 'Oct', 'Nov', 'Dec', 'total']
+dates = []
+data = []
 
 
 logfile_names = ["electrolyser.csv","inverter.csv"]
+
+
 electrolyserData = []
 inverterData = []
 data = [electrolyserData,inverterData]
 
-for i in range(0,2):
-    with open(logfile_names[i]) as csv_file:
-        csv_reader = csv.reader(csv_file,delimiter=',')
-        line_count = 0
-                
-        for row in csv_reader:
-            if line_count == 0:
-                #print(f'Column names are {",".join(row)}')
-                line_count+=1
-            else:
-                print("Appeding")
-                data[i].append(row)
-                line_count+=1
+def readCSVData():
+    for i in range(0,2):
+        with open(logfile_names[i]) as csv_file:
+            csv_reader = csv.reader(csv_file,delimiter=',')
+            line_count = 0       
+                    
+            for row in csv_reader:
+                if line_count == 0:
+                    #print(f'Column names are {",".join(row)}')
+                    line_count+=1
+                else:
+                    print("Appeding")
+                    data[i].append(row)
+                    line_count+=1
 
 
-dates = []
-rownumber = 0
-for i in range(0,2):
+    
     rownumber = 0
-    for row in data[i]:
-        date = data[i][rownumber][0]
-        if(date in dates) == False:
-            dates.append(date)
-        rownumber+=1
-
-
-
+    for i in range(0,2):
+        rownumber = 0
+        for row in data[i]:
+            date = data[i][rownumber][0]
+            if(date in dates) == False:
+                dates.append(date)
+            rownumber+=1
 
 # This class is responsible for plotting the graph of a temperature readout.
 class TempGraph(flx.Widget):
     def init(self):
-        
-
         
         with flx.HFix():
             flx.Widget(flex=1)
@@ -91,6 +91,9 @@ class TempGraph(flx.Widget):
                                            xlabel='Time', ylabel=u'Power')
             flx.Widget(flex=1)
     
+
+
+
     @flx.reaction
     def _update_plot(self):
         print("Selected Date: " + self.date.selected_key)
@@ -152,3 +155,7 @@ def date_data(date):
     electrolyserParameters = [flowselectrolyser,H2Totalselectrolyser,voltageselectrolyser,pressureselectrolyser,tempselectrolyser]
     inverterParameters = [currentPowerInverter,energyTodayInverter,totalEnergyInverter]
     return times, electrolyserParameters, inverterParameters
+
+
+
+
