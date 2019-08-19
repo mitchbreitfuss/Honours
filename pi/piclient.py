@@ -108,9 +108,9 @@ class Application(Frame):
         if(SERIAL_AVAILABLE==True):
             self.readSerial()
     def flexxcall(self):
-        import flxtest
-        flxtest.readCSVData()
-        app = flx.App(flxtest.TempGraph)
+        import flxtest as graphApp
+        graphApp.readCSVData()
+        app = flx.App(graphApp.TempGraph)
         app.launch('app')
         flx.run()
     Frame.RECIEVING_INVERTER = 0
