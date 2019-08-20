@@ -172,7 +172,10 @@ class Application(Frame):
                     outfile = open("inverter.csv", "a")
                     now = datetime.datetime.now()
                     date = str(now.year) + "_" + str(now.month) + "_" + str(now.day)
-                    time = str(now.hour) + str(now.minute)
+                    if(len(str(now.minute))== 1):
+                        time = str(now.hour) + "0" + str(now.minute)
+                    else:
+                        time = str(now.hour) + str(now.minute)
                     outfile.write("\n"+date+ ",")
                     outfile.write(time + ",")
                     WRITE_DATETIME = 0;
