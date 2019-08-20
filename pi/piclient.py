@@ -171,13 +171,16 @@ class Application(Frame):
                 if(decodedMessage=="101.00"):
                     print("Writing Date and Time")
                     WRITE_DATETIME = 1
-                    Frame.RECIEVING_INVERTER = 1
-                    decodedMessage = ''
+                    Frame.RECIEVING = 1
+                    
+                if(decodedMessage=="201.00"):
+                    WRITE_DATETIME = 1
+                    Frame.RECIEVING = 1
 
                 if(WRITE_DATETIME == 1):
-                    if(dataType == "INVERTERLOG"):
+                    if(decodedMessage == "101.00"):
                         outfile = open("inverter.csv", "a")
-                    if(dataType == "ELECTROLYSERLOG"):
+                    if(decodedMessage == "201.00"):
                         outfile = open("electrolyser.csv","a")
                     now = datetime.datetime.now()
                     date = str(now.year) + "_" + str(now.month) + "_" + str(now.day)
