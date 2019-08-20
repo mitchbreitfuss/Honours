@@ -116,9 +116,9 @@ class Application(Frame):
     Frame.RECIEVING_INVERTER = 0
     if(SERIAL_AVAILABLE == True):
         def readSerial(self):
-
+            
             now = datetime.datetime.now()
-            if(now.minute % 1 == 0 and now.second == 0):
+            if(now.hour % 1 == 0 and now.minute == 0 and now.second == 0):
                 logData()
                 time.sleep(1)
 
@@ -175,7 +175,10 @@ class Application(Frame):
                     decodedMessage = ''
 
                 if(WRITE_DATETIME == 1):
-                    outfile = open("inverter.csv", "a")
+                    if(dataType == "INVERTERLOG"):
+                        outfile = open("inverter.csv", "a")
+                    if(dataType == "ELECTROLYSERLOG"):
+                        outfile = open("electrolyser.csv","a")
                     now = datetime.datetime.now()
                     date = str(now.year) + "_" + str(now.month) + "_" + str(now.day)
                     if(len(str(now.minute))== 1):
@@ -184,16 +187,16 @@ class Application(Frame):
                         time = str(now.hour) + str(now.minute)
                     outfile.write("\n"+date+ ",")
                     outfile.write(time + ",")
-                    WRITE_DATETIME = 0;
+                    WRITE_DATETIME = 0
                     outfile.close()
 
                 if(decodedMessage=="102.00"):
-                    Frame.RECIEVING_INVERTER = 0
+                    Frame.RECIEVING = 0
 
                 if(decodedMessage != ''):
                     if(dataType == "INVERTERLOG"):
-                        print("RECIEVING_INVERTER = " + str(Frame.RECIEVING_INVERTER))
-                        if(Frame.RECIEVING_INVERTER ==1):
+                        print("RECIEVING_INVERTER = " + str(Frame.RECIEVING))
+                        if(Frame.RECIEVING ==1):
                             print("Writing to CSV")
                             outfile = open("inverter.csv", "a")
                             outfile.write(decodedMessage + ",")
@@ -201,12 +204,12 @@ class Application(Frame):
 
                         
                     if(dataType == "ELECTROLYSERLOG"):
-                        self.displayMessage.delete(1.0, END)
-                        self.displayMessage.insert(END, decodedMessage)
-                        print("[Message] " + decodedMessage)
-                        outfile = open("electrolyser.csv", "a")
-                        outfile.write(decodedMessage + "    ")
-        
+                        print("RECIEVING_ELECTROLYSER = " + str(Frame.RECIEVING))
+                        if(Frame.RECIEVING ==1):
+                            print("Writing to CSV")
+                            outfile = open("electrolyser.csv", "a")
+                            outfile.write(decodedMessage + ",")
+
                     if(dataType == "message"):
                         self.displayMessage.delete(1.0, END)
                         self.displayMessage.insert(END, decodedMessage)
