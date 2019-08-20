@@ -8,7 +8,6 @@ except:
     SERIAL_AVAILABLE = False
 from tkinter import *
 from flexx import flx
-from gpiozero import LED
 
 
 
@@ -98,8 +97,6 @@ def ardReset():
     reset = LED(18)
     reset.blink()
 
-
-
 # GUI Object, using Tkinter.
 class Application(Frame):
 
@@ -107,6 +104,7 @@ class Application(Frame):
 
         # Initialise function, runs at the startup of the GUI.
     def __init__(self, parent=None):
+        
         Frame.__init__(self, parent)
         self.grid()
         self.createWidgets()
@@ -118,7 +116,7 @@ class Application(Frame):
         app = flx.App(graphApp.TempGraph)
         app.launch('app')
         flx.run()
-    Frame.RECIEVING_INVERTER = 0
+    
     if(SERIAL_AVAILABLE == True):
         def readSerial(self):
             
@@ -134,7 +132,7 @@ class Application(Frame):
             # Messages are for general communications between the two devices, for debugging purposes.
             # Commands are for changing parameters on either device to change how it operates.
             x = ser.readline()  # Reads in a line from the serial port.
-            #print(x)
+            print(x)
             WRITE_DATETIME=0
             
             # This if statement will only run if the read line x has non-zero length.
@@ -169,7 +167,7 @@ class Application(Frame):
                     decodedMessage = decodedMessage.replace("$L1", "")
                     dataType = "INVERTERLOG"
                 if("$L2" in decodedMessage):
-                    decodedMessage = decodedMessage.replace("$L", "")
+                    decodedMessage = decodedMessage.replace("$L2", "")
                     dataType = "ELECTROLYSERLOG"
                 print(decodedMessage)
 
@@ -179,6 +177,8 @@ class Application(Frame):
                     Frame.RECIEVING = 1
                     
                 if(decodedMessage=="201.00"):
+                    print("recieving electrolyser")
+                    
                     WRITE_DATETIME = 1
                     Frame.RECIEVING = 1
 
@@ -186,6 +186,7 @@ class Application(Frame):
                     if(decodedMessage == "101.00"):
                         outfile = open("inverter.csv", "a")
                     if(decodedMessage == "201.00"):
+                        print("Opening Electrolyser CSV")
                         outfile = open("electrolyser.csv","a")
                     now = datetime.datetime.now()
                     date = str(now.year) + "_" + str(now.month) + "_" + str(now.day)
@@ -197,8 +198,9 @@ class Application(Frame):
                     outfile.write(time + ",")
                     WRITE_DATETIME = 0
                     outfile.close()
+                    decodedMessage = ""
 
-                if(decodedMessage=="102.00"):
+                if(decodedMessage=="102.00" or decodedMessage == "202.00"):
                     Frame.RECIEVING = 0
 
                 if(decodedMessage != ''):
