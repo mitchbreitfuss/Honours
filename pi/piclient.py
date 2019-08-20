@@ -91,7 +91,7 @@ def CLI():
 
 
 def logData():
-    sendCommand(command='100$C')
+    sendCommand(command='100$S')
 
 
 
@@ -116,6 +116,11 @@ class Application(Frame):
     Frame.RECIEVING_INVERTER = 0
     if(SERIAL_AVAILABLE == True):
         def readSerial(self):
+
+            now = datetime.datetime.now()
+            if(now.minute % 2 == 0 and seconds == 0):
+                logData()
+
                 # This method is responsible for communicating over the serial port with the arduino.
             # It also handles the data based on what kind of communication it is.
             # Currently there are 3 dataTypes, $D (data), $M (message), $C (command).

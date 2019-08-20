@@ -26,7 +26,7 @@ def readCSVData():
                     #print(f'Column names are {",".join(row)}')
                     line_count+=1
                 else:
-                    print("Appeding")
+                    
                     data[i].append(row)
                     line_count+=1
 
