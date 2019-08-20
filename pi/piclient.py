@@ -8,6 +8,7 @@ except:
     SERIAL_AVAILABLE = False
 from tkinter import *
 from flexx import flx
+from gpiozero import LED
 
 
 
@@ -66,12 +67,16 @@ def retrieveInput():
 
 # Placeholder method for testing connections to multiple wireless access points.
 def serverConnect1():
+    ardReset()
+    time.sleep(5)
     print("Server 1")
     command = "1$S\n"
     sendCommand(command)
 
 # Placeholder method for testing connections to multiple wireless access points.
 def serverConnect2():
+    ardReset()
+    time.sleep(5)
     print("Server 2")
     command = "2$S\n"
     sendCommand(command)
@@ -95,7 +100,8 @@ def logData():
 
 def ardReset():
     reset = LED(18)
-    reset.blink()
+    reset.on()
+    reset.off()
 
 # GUI Object, using Tkinter.
 class Application(Frame):
