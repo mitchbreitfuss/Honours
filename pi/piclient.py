@@ -120,6 +120,7 @@ class Application(Frame):
             now = datetime.datetime.now()
             if(now.minute % 1 == 0 and now.second == 0):
                 logData()
+                time.sleep(1)
 
                 # This method is responsible for communicating over the serial port with the arduino.
             # It also handles the data based on what kind of communication it is.
