@@ -8,6 +8,7 @@ except:
     SERIAL_AVAILABLE = False
 from tkinter import *
 from flexx import flx
+from gpiozero import LED
 
 
 
@@ -92,6 +93,10 @@ def CLI():
 
 def logData():
     sendCommand(command='100$S')
+
+def ardReset():
+    reset = LED(18)
+    reset.blink()
 
 
 
@@ -234,7 +239,7 @@ class Application(Frame):
         # Below the GUI elements are created  
         self.winfo_toplevel().title("Pi Client")
         # Server 1 Connect Button  
-        self.ser1Button = Button(self,text="Server 1",command=serverConnect1)
+        self.ser1Button = Button(self,text="Server 1",command=ardReset)
         self.ser1Button.grid(row=0,column=0)
         
         # Server 2 Connect Button
