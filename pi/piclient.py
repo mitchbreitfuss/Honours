@@ -118,7 +118,7 @@ class Application(Frame):
         def readSerial(self):
 
             now = datetime.datetime.now()
-            if(now.minute % 2 == 0 and seconds == 0):
+            if(now.minute % 1 == 0 and now.second == 0):
                 logData()
 
                 # This method is responsible for communicating over the serial port with the arduino.
