@@ -8,7 +8,7 @@ except:
     SERIAL_AVAILABLE = False
 from tkinter import *
 from flexx import flx
-from gpiozero import LED
+#from gpiozero import LED
 
 
 

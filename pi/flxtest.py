@@ -53,6 +53,18 @@ class TempGraph(flx.Widget):
                     self.date = flx.ComboBox(options=dates, selected_index=len(dates)-1, style='width: 100%')
                 flx.Widget(flex=3)
             with flx.VBox(flex=4):
+                self.invpowerplot = flx.PlotWidget(flex=1,
+                                           xdata=date_data(self.date.selected_key)[0], yrange=(0, 50),
+                                           title='Inverter',
+                                           xlabel='Time', ylabel=u'Power')
+                self.invenergyplot = flx.PlotWidget(flex=1,
+                                           xdata=date_data(self.date.selected_key)[0], yrange=(0, 60),
+                                           title='Electrolyser',
+                                           xlabel='Time', ylabel=u'H2 Total')
+                self.invtotalenergyplot = flx.PlotWidget(flex=1,
+                                           xdata=date_data(self.date.selected_key)[0], yrange=(0, 10000),
+                                           title='Inverter',
+                                           xlabel='Time', ylabel=u'Power')
                 self.electempplot = flx.PlotWidget(flex=1,
                                            xdata=date_data(self.date.selected_key)[0], yrange=(0, 50),
                                            title='Electrolyser ',
@@ -60,7 +72,7 @@ class TempGraph(flx.Widget):
                 self.elecflowplot = flx.PlotWidget(flex=1,
                                            xdata=date_data(self.date.selected_key)[0], yrange=(0, 50),
                                            title='',
-                                           xlabel='Time', ylabel=u'flow')
+                                           xlabel='Time', ylabel=u'flow (nl/h)')
                 self.elecH2Totalplot = flx.PlotWidget(flex=1,
                                            xdata=date_data(self.date.selected_key)[0], yrange=(0, 2000),
                                            title='',
@@ -77,18 +89,7 @@ class TempGraph(flx.Widget):
 
 
 
-                self.invpowerplot = flx.PlotWidget(flex=1,
-                                           xdata=date_data(self.date.selected_key)[0], yrange=(0, 50),
-                                           title='Inverter',
-                                           xlabel='Time', ylabel=u'Power')
-                self.invenergyplot = flx.PlotWidget(flex=1,
-                                           xdata=date_data(self.date.selected_key)[0], yrange=(0, 1200),
-                                           title='Inverter',
-                                           xlabel='Time', ylabel=u'Power')
-                self.invtotalenergyplot = flx.PlotWidget(flex=1,
-                                           xdata=date_data(self.date.selected_key)[0], yrange=(0, 10000),
-                                           title='Inverter',
-                                           xlabel='Time', ylabel=u'Power')
+
             flx.Widget(flex=1)
     
 

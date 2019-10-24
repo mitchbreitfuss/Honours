@@ -25,7 +25,7 @@ void setup()
     delay(1000);
     int baud = 9600;
     Serial.begin(baud);
-	COM.begin(baud);
+	  COM.begin(baud);
 
     
     delay(2000);
@@ -40,7 +40,7 @@ int server = 0;
 float toSend = 3.14;
 void loop(){
 
-    Serial.println("TOP OF LOOP");
+   
     if(COM.available()){
         delay(100);
         String recieved = COM.readStringUntil('\n');
@@ -84,26 +84,32 @@ void loop(){
             break;
     
         case 2:
-            WiFi.begin(ssid2,password2);
-
-            while(WiFi.status() != WL_CONNECTED){
-                Serial.print('.');
-                delay(300);
-            }
-            Serial.println("Connected to AP 2");
-            Serial.print("\nWifi Connected\n IP Address: " + WiFi.localIP());
-            Serial.print("\nWifi");
-
-            WiFi.disconnect();
+            serverConnect(2);
             server = 0;
+            WiFi.disconnect();
+            break;
+        case 100:
+            serverConnect(1);
+            WiFi.disconnect();
+            delay(10000);
+            
+            serverConnect(2);
+            WiFi.disconnect();
+            
+            
+            
+            server = 0;
+            break;
             
         case 0:
             Serial.println("[Info] Idle, ready for command");
+            
             COM.println("[Arduino]Idle, ready for command.");
             server = -1;
             break;
         case -1:
-            Serial.println("server = -1");
+            //Serial.println("server = -1");
+            //COM.println("TESTING");
             break;
     }
         

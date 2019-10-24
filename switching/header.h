@@ -1,30 +1,39 @@
 #include <Arduino.h>
 #include <SoftwareSerial.h>
 #include <ESP8266WiFi.h>
+#include <Wire.h>
 
 /*  TODO
     Create a function that calls getData to reduce repeated code.
 */ 
 
 //////////////////////////////////////////
-SoftwareSerial COM(D5,D6);
+SoftwareSerial COM(D6,D7);
 String option1;
 String option2;
 String option3;
 
-const char* ssid1     = "iiNet23F0A7";
-const char* password1 = "GK4EN4NAE695GFC";
-// const char* ssid1     = "Solax_AA870E88";
-// const char* password1 = "";
+// const char* ssid1     = "iiNet23F0A7";
+// const char* password1 = "GK4EN4NAE695GFC";
+const char* ssid1     = "Solax_AA870E88";
+const char* password1 = "";
 
 
-const char* ssid2     = "iiNet23F0A7";
-const char* password2 = "GK4EN4NAE695GFC";
+const char* ssid2     = "Linksys34968";
+const char* password2 = "";
 
-const char* host1 = "10.1.1.213";
-const char* host2 = "10.1.1.213";
+
+
+const char* host1 = "11.11.11.1";
+const char* host2 = "192.168.1.222";
 const char* streamId   = "....................";
 const char* privateKey = "....................";
+
+IPAddress local_ip(192,168,1,160);
+IPAddress gateway(192,168,1,1);
+IPAddress subnet(255,255,255,0);
+IPAddress primaryDNS(8,8,8,8);
+
 
 
 // Search Flags
@@ -122,6 +131,7 @@ String getData(String line, String searchFlag, int interface){
                 searchFlag = ""; // For sicing, reduces the length of the searchFlag to zero
                 sliceStart = 0; // As the interface for the Electrolyser is formatted correctly, the data is on its own line so requires less slicing
                 sliceEnd = line.indexOf(" ");
+                
             }
             
             break;
@@ -161,14 +171,16 @@ void  getFile(String fileName, String fileType, String hostAdd, int interface){
 
     // Use WiFiClient class to create TCP connections
     WiFiClient client;
-    const int httpPort = 8000;
+    const int httpPort = 80;
 
     if (!client.connect(hostAdd, httpPort)) {
         Serial.println("connection failed");
     return;
     }
+
     
     delay(500);
+    
     client.println(String("GET /") + fileName + " HTTP/1.1");
     
 
@@ -210,7 +222,7 @@ void  getFile(String fileName, String fileType, String hostAdd, int interface){
     delay(10);
     String line = client.readStringUntil('\n');
     //Serial.println(line);
-
+    
     if (fileType == "html-data"){
         if(line.indexOf("<html>")> -1){
 
@@ -263,15 +275,17 @@ void  getFile(String fileName, String fileType, String hostAdd, int interface){
             if(interface==2){
                 
                 if(line.indexOf("nl/h")>-1){
+                    Serial.println("FLOW SEARCHFLAG FOUND");
                     String searchFlag = FLOW_SEARCHFLAG;
                     flow = getData(line, searchFlag,interface);
                     Serial.print("[Flow] = ");
                     Serial.println(flow);
                     //sendLog(flow.toFloat());
-                    client.stop();
+                    
 
                 }
-                if(line.indexOf(" l				</p>")>-1){
+                if(line.indexOf(" l				</p>")>-1 or line.indexOf(" l ")>-1){
+                    Serial.println("H2 SEARCHFLAG FOUND");
                     String searchFlag = H2_TOTAL_SEARCHFLAG;
                     H2Total = getData(line,searchFlag,interface);
                     Serial.print("[H2 Total] = ");
@@ -362,6 +376,21 @@ void  getFile(String fileName, String fileType, String hostAdd, int interface){
         sendLog(102,1);
 
     }
+    if(interface == 2 and fileName != "login.shtml?pwd=Helio0000"){
+        sendLog(201,2);
+        delay(200);
+        sendLog(flow.toFloat(),2);
+        delay(200);
+        sendLog(H2Total.toFloat(),2);
+        delay(200);
+        sendLog(stackVoltage.toFloat(),2);
+        delay(200);
+        sendLog(pressure.toFloat(),2);
+        delay(200);
+        sendLog(temperature.toFloat(),2);
+        delay(200);
+        sendLog(202,2);
+    }
  
 
     //if(fileType == "config"){
@@ -385,22 +414,27 @@ void serverConnect(int server){
         ssid = ssid1;
         password = password1;
         fileName = "monitor.html";
-        hostAdd = "10.1.1.213";
+        hostAdd = host1;
     }
 
     if(server == 2){
         serverName = "Electrolyser";
         ssid = ssid2;
         password = password2;
-        fileName = "elweb.html";
-        hostAdd =  "10.1.1.213";
+        fileName = "index.shtml";
+        hostAdd =  host2;
     }
 
 
-    
+    if(server==2){
+        if (!WiFi.config((192,168,1,160), (192,168,1,1), (255,255,255,0), (8,8,8,8))) {
+            Serial.println("STA Failed to configure");
+    }
+    }
     Serial.println("Connecting to the "+serverName + "...");
     send("Connecting to the "+serverName + "...");
     WiFi.begin(ssid,password);
+
 
     while(WiFi.status() != WL_CONNECTED){
         delay(100);
@@ -410,6 +444,10 @@ void serverConnect(int server){
     Serial.println("Connected to AP "+ serverName);
     Serial.println("Wifi Connected\n IP Address: " + WiFi.localIP());
     Serial.println("Success! Connected to server " + server);
+    if(server==2){
+        Serial.println("Entering Passowrd");
+        getFile("login.shtml?pwd=Helio0000","html-data",hostAdd,server);
+    }
     getFile(fileName,"html-data",hostAdd,server);
 
     WiFi.disconnect();
@@ -422,6 +460,3 @@ void logData(){
     delay(200);
     serverConnect(1);
 }
-
-
-
